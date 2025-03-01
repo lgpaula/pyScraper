@@ -1,4 +1,5 @@
 import json
+import re
 from utils import Title
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -9,6 +10,7 @@ def parse_imdb_data(title_div_list):
 
         for item in title_div_list:
             name = item.find_element(By.CLASS_NAME, "ipc-title__text").text  # remove position number
+            name = re.sub(r'^\d+\.\s', '', name)
             
             id_element = item.find_element(By.CLASS_NAME, "ipc-lockup-overlay")
             href = id_element.get_attribute("href")

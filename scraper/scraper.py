@@ -48,8 +48,6 @@ def start_scraping():
 
         ul_element = driver.find_element(By.CLASS_NAME, "sc-e22973a9-0")  # Parent <ul>
         movie_items = ul_element.find_elements(By.CLASS_NAME, "ipc-metadata-list-summary-item")
-
-        # Pass the extracted data to the parser
         movies = parse_imdb_data(movie_items)
 
         # Print movie titles
@@ -66,7 +64,7 @@ def start_scraping():
             print()
 
     finally:
-        driver.quit()  # Close browser
+        driver.quit()
 
 if __name__ == "__main__":
     start_scraping()
