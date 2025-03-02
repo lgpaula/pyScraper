@@ -11,4 +11,5 @@ class Title:
     poster_url: str
     runtime: str
     title_type: str = "Movie"
-    genres: List[str] = None
+    genres: List[str] = None # get later
+    original_title: str = None # get later

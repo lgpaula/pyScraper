@@ -1,8 +1,3 @@
-# initializes selenium
-# loads imdb page
-# clicks button
-# passes html to parser.py
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -10,8 +5,12 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from parser import parse_imdb_data
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from db.database import *
 
-def start_scraping():
+def setup_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
@@ -19,6 +18,10 @@ def start_scraping():
 
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
+
+def start_scraping():
+    driver = setup_driver()
 
     try:
         url = "https://www.imdb.com/search/title/?title_type=tv_series"
@@ -50,21 +53,15 @@ def start_scraping():
         movie_items = ul_element.find_elements(By.CLASS_NAME, "ipc-metadata-list-summary-item")
         movies = parse_imdb_data(movie_items)
 
-        # Print movie titles
-        for movie in movies:
-            print(movie.title_name)
-            print(movie.title_id)
-            print(movie.year_span)
-            print(movie.rating)
-            print(movie.plot)
-            print(movie.poster_url)
-            print(movie.runtime)
-            print(movie.genres)
-            print(movie.title_type)
-            print()
+        return movies
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    start_scraping()
+    movies = start_scraping()
+    create_table()
+    for movie in movies:
+        insert_title(movie)
+
+    # print(fetch_titles())
