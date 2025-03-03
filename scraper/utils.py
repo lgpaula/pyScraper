@@ -13,3 +13,8 @@ class Title:
     title_type: str = "Movie"
     genres: List[str] = None # get later
     original_title: str = None # get later
+    stars: List[str] = None
+    writer: str = None
+    director: str = None
+    schedule: str = None
+    company: str = None
