@@ -4,7 +4,7 @@ from utils import Title
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-def parse_imdb_data(title_div_list):
+def parse_title_list(title_div_list):
     try:
         titles = []
 
@@ -68,3 +68,35 @@ def parse_imdb_data(title_div_list):
     except KeyError as e:
         print("Missing expected key in JSON:", e)
         return []
+
+
+# add unknown stars to dict(id, stars)
+# add unknown genres to dict(id, genre)
+# add unknown writer to dict(id, writer)
+# add unknown company to dict(id, company)
+
+# stars
+# writer
+# genres
+# director
+# schedule
+# original title
+# producer / company
+
+def get_companies(parent2):
+    json_text = parent2.get_attribute("innerHTML")
+
+    # Parse the JSON
+    data = json.loads(json_text)
+
+    # Extract production companies
+    companies = data["props"]["pageProps"]["aboveTheFoldData"]["production"]["edges"]
+    company_names = [company["node"]["company"]["companyText"]["text"] for company in companies]
+
+    # Print the company names
+    print(company_names)
+
+def parse_single_title(parent1, parent2):
+    companies = get_companies(parent2)
+
+

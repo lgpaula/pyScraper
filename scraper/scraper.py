@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-from parser import parse_imdb_data
+from parser import *
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -20,7 +20,7 @@ def setup_driver():
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
 
-def start_scraping():
+def scrape_multiple_titles():
     driver = setup_driver()
 
     try:
@@ -51,17 +51,40 @@ def start_scraping():
 
         ul_element = driver.find_element(By.CLASS_NAME, "sc-e22973a9-0")  # Parent <ul>
         movie_items = ul_element.find_elements(By.CLASS_NAME, "ipc-metadata-list-summary-item")
-        movies = parse_imdb_data(movie_items)
+        movies = parse_title_list(movie_items)
 
         return movies
 
     finally:
         driver.quit()
 
+def scrape_single_title():
+    driver = setup_driver()
+
+    try:
+        url = "https://www.imdb.com/title/tt11280740/"
+        driver.get(url)
+        time.sleep(1)
+
+        # get parent element no.1
+        parent1 = driver.find_element(By.CLASS_NAME, "sc-9a2a0028-6")
+        # get parent element no.2
+        parent2 = driver.find_element(By.XPATH, '//script[@id="__NEXT_DATA__"]')
+
+        title = parse_single_title(parent1, parent2)
+
+        return title
+
+    finally:
+        driver.quit()
+
 if __name__ == "__main__":
-    movies = start_scraping()
-    create_table()
-    for movie in movies:
-        insert_title(movie)
+    scrape_single_title()
+
+
+    # movies = scrape_multiple_titles()
+    # create_table()
+    # for movie in movies:
+    #     insert_title(movie)
 
     # print(fetch_titles())
