@@ -3,6 +3,7 @@ import re
 from utils import Title
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from database import update_title
 
 def parse_title_list(title_div_list):
     try:
@@ -74,14 +75,6 @@ def parse_title_list(title_div_list):
 # add unknown genres to dict(id, genre)
 # add unknown writer to dict(id, writer)
 # add unknown company to dict(id, company)
-
-# stars
-# writer
-# genres
-# director
-# schedule
-# original title
-# producer / company
 
 def get_companies(parent2):
     json_text = parent2.get_attribute("innerHTML")
@@ -191,3 +184,17 @@ def parse_single_title(parent1, parent2, title_id):
     print("\nOriginal Title:")
     print(original_title if original_title else "Not available")
 
+    #update title in database
+    curr_title = Title (
+        title_id = title_id,
+        genres = genres,
+        original_title = original_title,
+        stars = stars,
+        writers = writers,
+        directors = directors,
+        creators = creators,
+        schedule = schedule,
+        companies = companies
+    )
+
+    database.update_title(title_id, curr_title)

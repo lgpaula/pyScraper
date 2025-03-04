@@ -18,8 +18,14 @@ def create_table():
                 poster_url TEXT,
                 runtime TEXT,
                 title_type TEXT DEFAULT 'Movie',
-                genres TEXT,  -- Stored as CSV, parsed later
-                original_title TEXT
+                genres TEXT,
+                original_title TEXT,
+                stars TEXT,
+                writers TEXT,
+                directors TEXT,
+                creators TEXT,
+                schedule TEXT,
+                companies TEXT
             )
         """)
         conn.commit()
@@ -36,8 +42,8 @@ def insert_title(title: Title):
     if not title_exists(title.title_id):
         with sqlite3.connect(DB_NAME) as conn:
             cursor = conn.cursor()
-            cursor.execute("""INSERT INTO titles (title_id, title_name, year_span, rating, plot, poster_url, runtime, title_type, genres, original_title) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+            cursor.execute("""INSERT INTO titles (title_id, title_name, year_span, rating, plot, poster_url, runtime, title_type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", 
                 (title.title_id, title.title_name, title.year_span, title.rating, title.plot, title.poster_url, title.runtime, title.title_type, ",".join(title.genres) 
                     if title.genres else None, title.original_title))
             conn.commit()
@@ -51,3 +57,50 @@ def fetch_titles():
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM titles")
         return cursor.fetchall()
+
+def update_title(title_id: str, title: Title):
+    """Updates an existing title in the database."""
+    if not title_exists(title_id):
+        print(f"Title ID {title_id} not found. Cannot update.")
+        return
+
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE titles 
+            SET title_name = ?, 
+                year_span = ?, 
+                rating = ?, 
+                plot = ?, 
+                poster_url = ?, 
+                runtime = ?, 
+                title_type = ?, 
+                genres = ?, 
+                original_title = ?
+            WHERE title_id = ?
+        """, (
+            title.title_name,
+            title.year_span,
+            title.rating,
+            title.plot,
+            title.poster_url,
+            title.runtime,
+            title.title_type,
+            ",".join(title.genres) if title.genres else None,
+            title.original_title,
+            title_id
+        ))
+        conn.commit()
+        print(f"Updated: {title_id}")
+        print_title(title_id)
+
+def print_title(id):
+    """Prints the title with the given title_id."""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM titles WHERE title_id = ?", (id,))
+        title = cursor.fetchone()
+        if title:
+            print(title)
+        else:
+            print(f"Title ID {id} not found.")
