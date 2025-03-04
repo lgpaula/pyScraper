@@ -58,28 +58,28 @@ def scrape_multiple_titles():
     finally:
         driver.quit()
 
-def scrape_single_title():
+def scrape_single_title(title_id):
     driver = setup_driver()
 
     try:
-        url = "https://www.imdb.com/title/tt11280740/"
+        url = "https://www.imdb.com/title/" + title_id
         driver.get(url)
         time.sleep(1)
 
         # get parent element no.1
-        parent1 = driver.find_element(By.CLASS_NAME, "sc-9a2a0028-6")
+        parent1 = driver.find_element(By.CLASS_NAME, "sc-9a2a0028-0")
         # get parent element no.2
         parent2 = driver.find_element(By.XPATH, '//script[@id="__NEXT_DATA__"]')
 
-        title = parse_single_title(parent1, parent2)
+        parse_single_title(parent1, parent2, title_id)
 
-        return title
+        # return title
 
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    scrape_single_title()
+    scrape_single_title("tt14961016")
 
 
     # movies = scrape_multiple_titles()
