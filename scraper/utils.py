@@ -22,7 +22,6 @@ class Title:
 
 # dicts or nosql?
 dict_id_stars = {}
-dict_id_genre = {}
 dict_id_writer = {}
 dict_id_company = {}
 dict_id_creator = {}
