@@ -2,7 +2,7 @@ import sqlite3
 from utils import Title
 
 # Database setup
-DB_NAME = "titles.db"
+DB_NAME = "../config/database/titles.db"
 
 def create_table():
     """Creates the 'titles' table if it does not exist."""
