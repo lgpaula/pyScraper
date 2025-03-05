@@ -21,11 +21,10 @@ def setup_driver():
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
 
-def scrape_multiple_titles():
+def scrape_multiple_titles(url: str):
     driver = setup_driver()
 
     try:
-        url = "https://www.imdb.com/search/title/?title_type=tv_series"
         driver.get(url)
         time.sleep(1)  # A better approach would be WebDriverWait
 
@@ -78,9 +77,24 @@ def save_to_file(driver):
     with open("page_source.txt", "w", encoding="utf-8") as f:
         f.write(driver.page_source)
 
+def custom_search_url(params: dict) -> str:
+    base_url = "https://www.imdb.com/search/title/"
+    
+    formatted_params = {key: ",".join(value) for key, value in params.items()}
+    query_string = urlencode(formatted_params, doseq=True)
+
+    return f"{base_url}?{query_string}"
+
+
 if __name__ == "__main__":
     scrape_single_title("tt14961016")
 
+    # example of custom search
+    params = {
+        "title_type": ["feature", "tv_series"],
+        "user_rating": ["8", "10"],
+        "genres": ["comedy", "animation", "action"]
+    }
 
     # movies = scrape_multiple_titles()
     # create_table()
