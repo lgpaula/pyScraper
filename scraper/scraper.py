@@ -9,6 +9,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from db.database import *
+from utils import XPaths
 
 def setup_driver():
     chrome_options = Options()
@@ -30,7 +31,7 @@ def scrape_multiple_titles():
 
         # Remove consent banner
         try:
-            bannerButton = driver.find_element(By.CSS_SELECTOR, ".icb-btn.sc-bcXHqe.sc-hLBbgP.sc-ftTHYK.dcvrLS.dufgkr.ecppKW")
+            bannerButton = driver.find_element(By.CSS_SELECTOR, banner_element)
             bannerButton.click()
             time.sleep(1)
         except Exception as e:
@@ -38,19 +39,16 @@ def scrape_multiple_titles():
 
         # Click "See more" button (maybe multiple times)
         try:
-            button = driver.find_element(By.CLASS_NAME, "ipc-see-more__text")
-            driver.execute_script("arguments[0].scrollIntoView(true);", button)
+            button = driver.find_element(By.CLASS_NAME, see_more_button)
+            driver.execute_script(scroll_into_view, button)
             # time.sleep(1)
             # button.click()
             # time.sleep(1)
         except Exception as e:
             print("No button found or click failed:", e)
 
-        # with open("page_source.txt", "w", encoding="utf-8") as f:
-        #     f.write(driver.page_source)
-
-        ul_element = driver.find_element(By.CLASS_NAME, "sc-e22973a9-0")  # Parent <ul>
-        movie_items = ul_element.find_elements(By.CLASS_NAME, "ipc-metadata-list-summary-item")
+        ul_element = driver.find_element(By.CLASS_NAME, multi_title_parent)
+        movie_items = ul_element.find_elements(By.CLASS_NAME, multi_title_item)
         movies = parse_title_list(movie_items)
 
         return movies
@@ -66,10 +64,8 @@ def scrape_single_title(title_id):
         driver.get(url)
         time.sleep(1)
 
-        # get parent element no.1
-        parent1 = driver.find_element(By.CLASS_NAME, "sc-9a2a0028-0")
-        # get parent element no.2
-        parent2 = driver.find_element(By.XPATH, '//script[@id="__NEXT_DATA__"]')
+        parent1 = driver.find_element(By.CLASS_NAME, single_title_parent_1)
+        parent2 = driver.find_element(By.XPATH, single_title_parent_2)
 
         parse_single_title(parent1, parent2, title_id)
 
@@ -77,6 +73,10 @@ def scrape_single_title(title_id):
 
     finally:
         driver.quit()
+
+def save_to_file(driver):
+    with open("page_source.txt", "w", encoding="utf-8") as f:
+        f.write(driver.page_source)
 
 if __name__ == "__main__":
     scrape_single_title("tt14961016")
