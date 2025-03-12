@@ -4,34 +4,34 @@ from utils import Title
 from utils import XPaths
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-from database import update_title
+# from database import update_title
 
 def parse_title_list(title_div_list):
     try:
         titles = []
 
         for item in title_div_list:
-            name = item.find_element(By.CLASS_NAME, title_name).text
+            name = item.find_element(By.CLASS_NAME, XPaths.title_name).text
             name = re.sub(r'^\d+\.\s', '', name)
             
-            id_element = item.find_element(By.CLASS_NAME, title_id)
+            id_element = item.find_element(By.CLASS_NAME, XPaths.title_id)
             href = id_element.get_attribute("href")
             id = href.split("/title/")[1].split("/")[0]
 
-            yearSpan = item.find_elements(By.CLASS_NAME, title_year)[0].text
+            yearSpan = item.find_elements(By.CLASS_NAME, XPaths.title_year)[0].text
 
             try:
-                rating = item.find_element(By.XPATH, title_rating).text
+                rating = item.find_element(By.XPATH, XPaths.title_rating).text
             except NoSuchElementException:
                 rating = ""
 
             try:
-                plot = item.find_element(By.CLASS_NAME, title_plot).text
+                plot = item.find_element(By.CLASS_NAME, XPaths.title_plot).text
             except NoSuchElementException:
                 plot = ""
 
             try:
-                img_element = item.find_element(By.XPATH, title_poster)
+                img_element = item.find_element(By.XPATH, XPaths.title_poster)
                 srcset = img_element.get_attribute("srcset")
                 srcset_links = srcset.split(", ")
                 last_link = srcset_links[-1].split(" ")[0]
@@ -40,12 +40,12 @@ def parse_title_list(title_div_list):
                 poster_url = ""
 
             try:
-                runtime = item.find_elements(By.CLASS_NAME, title_runtime)[1].text
+                runtime = item.find_elements(By.CLASS_NAME, XPaths.title_runtime)[1].text
             except IndexError:
                 runtime = ""
 
             try:
-                title_type = item.find_element(By.CLASS_NAME, title_type).text
+                title_type = item.find_element(By.CLASS_NAME, XPaths.title_type).text
             except NoSuchElementException:
                 title_type = "Movie"
 
@@ -93,7 +93,7 @@ def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
 
     # Extract genres
-    genre_container = parent1.find_element(By.CLASS_NAME, title_genres)
+    genre_container = parent1.find_element(By.CLASS_NAME, XPaths.title_genres)
     genre_elements = genre_container.find_elements(By.TAG_NAME, "a")
     genres = []
     for genre in genre_elements:
@@ -106,7 +106,7 @@ def parse_single_title(parent1, parent2, title_id):
         print(f"- {name} (ID: {imdb_id})")
 
     # Extract creators and stars
-    metadata_items = parent1.find_elements(By.CLASS_NAME, title_metadata)
+    metadata_items = parent1.find_elements(By.CLASS_NAME, XPaths.title_metadata)
 
     stars = []
     writers = []
@@ -118,14 +118,14 @@ def parse_single_title(parent1, parent2, title_id):
         try:
             # Find the label (if it exists)
             try:
-                label_element = item.find_element(By.CLASS_NAME, title_metadata_label)
+                label_element = item.find_element(By.CLASS_NAME, XPaths.title_metadata_label)
                 label_text = label_element.text.strip()
             except NoSuchElementException:
                 continue  # Skip if no label is found
 
             # Find the container holding the names
             try:
-                content_container = item.find_element(By.CLASS_NAME, title_metadata_container)
+                content_container = item.find_element(By.CLASS_NAME, XPaths.title_metadata_container)
                 name_elements = content_container.find_elements(By.TAG_NAME, "a")  # Select all <a> tags inside it
 
                 # Extract name and IMDb ID for all entries
@@ -198,4 +198,4 @@ def parse_single_title(parent1, parent2, title_id):
         companies = companies
     )
 
-    database.update_title(title_id, curr_title)
+    # database.update_title(title_id, curr_title)

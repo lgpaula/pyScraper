@@ -30,7 +30,7 @@ def scrape_multiple_titles(url: str):
 
         # Remove consent banner
         try:
-            bannerButton = driver.find_element(By.CSS_SELECTOR, banner_element)
+            bannerButton = driver.find_element(By.CSS_SELECTOR, XPaths.banner_element)
             bannerButton.click()
             time.sleep(1)
         except Exception as e:
@@ -38,16 +38,16 @@ def scrape_multiple_titles(url: str):
 
         # Click "See more" button (maybe multiple times)
         try:
-            button = driver.find_element(By.CLASS_NAME, see_more_button)
-            driver.execute_script(scroll_into_view, button)
+            button = driver.find_element(By.CLASS_NAME, XPaths.see_more_button)
+            driver.execute_script(XPaths.scroll_into_view, button)
             # time.sleep(1)
             # button.click()
             # time.sleep(1)
         except Exception as e:
             print("No button found or click failed:", e)
 
-        ul_element = driver.find_element(By.CLASS_NAME, multi_title_parent)
-        movie_items = ul_element.find_elements(By.CLASS_NAME, multi_title_item)
+        ul_element = driver.find_element(By.CLASS_NAME, XPaths.multi_title_parent)
+        movie_items = ul_element.find_elements(By.CLASS_NAME, XPaths.multi_title_item)
         movies = parse_title_list(movie_items)
 
         return movies
@@ -63,8 +63,8 @@ def scrape_single_title(title_id):
         driver.get(url)
         time.sleep(1)
 
-        parent1 = driver.find_element(By.CLASS_NAME, single_title_parent_1)
-        parent2 = driver.find_element(By.XPATH, single_title_parent_2)
+        parent1 = driver.find_element(By.CLASS_NAME, XPaths.single_title_parent_1)
+        parent2 = driver.find_element(By.XPATH, XPaths.single_title_parent_2)
 
         parse_single_title(parent1, parent2, title_id)
 
@@ -87,18 +87,18 @@ def custom_search_url(params: dict) -> str:
 
 
 if __name__ == "__main__":
-    scrape_single_title("tt14961016")
+    # scrape_single_title("tt14961016")
 
     # example of custom search
-    params = {
-        "title_type": ["feature", "tv_series"],
-        "user_rating": ["8", "10"],
-        "genres": ["comedy", "animation", "action"]
-    }
+    # params = {
+    #     "title_type": ["feature", "tv_series"],
+    #     "user_rating": ["8", "10"],
+    #     "genres": ["comedy", "animation", "action"]
+    # }
 
-    # movies = scrape_multiple_titles()
-    # create_table()
-    # for movie in movies:
-    #     insert_title(movie)
+    movies = scrape_multiple_titles("https://www.imdb.com/search/title/?title_type=feature")
+    create_table()
+    for movie in movies:
+        insert_title(movie)
 
     # print(fetch_titles())

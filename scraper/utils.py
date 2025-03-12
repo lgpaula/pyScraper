@@ -39,11 +39,11 @@ class XPaths:
     single_title_parent_2 = '//script[@id="__NEXT_DATA__"]'
     title_name = "ipc-title__text"
     title_id = "ipc-lockup-overlay"
-    title_year = "sc-d5ea4b9d-7"
+    title_year = "jhjEEd"
     title_rating = "//span[@class='ipc-rating-star--rating']"
     title_plot = "ipc-html-content-inner-div"
     title_poster = ".//div[contains(@class, 'ipc-media')]/img"
-    title_runtime = "sc-d5ea4b9d-7"
+    title_runtime = "jhjEEd"
     title_type = "sc-d5ea4b9d-4"
     title_genres = "ipc-chip-list__scroller"
     title_metadata = "ipc-metadata-list__item"
