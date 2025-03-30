@@ -130,7 +130,4 @@ companies {
 keywords {
     - 211 ish discoverable ones
 }
-cast_or_crew {
-    - discoverable ones
-}
 '''
