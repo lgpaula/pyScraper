@@ -40,9 +40,9 @@ def scrape_multiple_titles(url: str):
         try:
             button = driver.find_element(By.CLASS_NAME, XPaths.see_more_button)
             driver.execute_script(XPaths.scroll_into_view, button)
-            # time.sleep(1)
-            # button.click()
-            # time.sleep(1)
+            time.sleep(1)
+            button.click()
+            time.sleep(1)
         except Exception as e:
             print("No button found or click failed:", e)
 
@@ -101,4 +101,36 @@ if __name__ == "__main__":
     for movie in movies:
         insert_title(movie)
 
-    # print(fetch_titles())
+    print(fetch_titles())
+
+
+
+'''
+scrapable:
+
+type {
+    - movie (+tvmovie)
+    - tvseries(+shorts + tvminiseries)
+}
+release_date {
+    - yyyy
+    - yyyy - yyyy
+}
+imdb_rating {
+    - xx.x
+    - xx.x - xx.x
+}
+genre {
+    - 27 main ones
+}
+companies {
+    - 8 main ones
+    - discoverable ones
+}
+keywords {
+    - 211 ish discoverable ones
+}
+cast_or_crew {
+    - discoverable ones
+}
+'''
