@@ -21,6 +21,7 @@ def setup_driver():
 
     service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.set_page_load_timeout(120)
     return driver
 
 def scrape_multiple_titles(url: str):

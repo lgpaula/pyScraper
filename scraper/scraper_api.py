@@ -9,14 +9,11 @@ def health():
 
 @app.route("/scrape", methods=["GET"])
 def scrape():
-    # data = request.json
-    # criteria = data.get("criteria", "")
-
     criteria = request.args.get('criteria', '')
     print(f"Received request with criteria: {criteria}")
 
     try:
-        result = subprocess.run(["python3", "scraper.py", criteria], capture_output=True, text=True, check=True)
+        result = subprocess.run(["python3", "scraper.py", criteria], capture_output=True, text=True, check=True, timeout=120)
         print(f"Scraper Output: {result.stdout}")  # Log scraper output
         return jsonify({"success": True, "output": result.stdout.strip()})
     
@@ -29,4 +26,4 @@ def scrape():
         return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=True)
+    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=True, threaded=True)
