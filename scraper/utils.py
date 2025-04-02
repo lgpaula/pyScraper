@@ -40,7 +40,7 @@ class XPaths:
     title_name = "ipc-title__text"
     title_id = "ipc-lockup-overlay"
     title_year = "hvVhYi" #sc-e8bccfea-7
-    title_rating = "//span[@class='ipc-rating-star--rating']"
+    title_rating = "ipc-rating-star--rating"
     title_plot = "ipc-html-content-inner-div"
     title_poster = ".//div[contains(@class, 'ipc-media')]/img"
     title_runtime = "hvVhYi" #sc-e8bccfea-7

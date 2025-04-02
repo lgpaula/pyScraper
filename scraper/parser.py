@@ -21,7 +21,7 @@ def parse_title_list(title_div_list):
             yearSpan = item.find_elements(By.CLASS_NAME, XPaths.title_year)[0].text
 
             try:
-                rating = item.find_element(By.XPATH, XPaths.title_rating).text
+                rating = item.find_element(By.CLASS_NAME, XPaths.title_rating).text
             except NoSuchElementException:
                 rating = ""
 
