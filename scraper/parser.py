@@ -19,6 +19,14 @@ def parse_title_list(title_div_list):
             id = href.split("/title/")[1].split("/")[0]
 
             yearSpan = item.find_elements(By.CLASS_NAME, XPaths.title_year)[0].text
+            yearStart, yearEnd = None, None
+
+            if "-" in yearSpan:  # range
+                parts = yearSpan.split("-")
+                yearStart = int(parts[0]) if parts[0].isdigit() else None
+                yearEnd = int(parts[1]) if parts[1].isdigit() else None
+            else:
+                yearStart = int(yearSpan) if yearSpan.isdigit() else None
 
             try:
                 rating = item.find_element(By.CLASS_NAME, XPaths.title_rating).text
@@ -53,7 +61,8 @@ def parse_title_list(title_div_list):
                 title_id = id,
                 title_name = name,
                 title_type = title_type,
-                year_span = yearSpan,
+                year_start = yearStart,
+                year_end = yearEnd,
                 rating = rating,
                 plot = plot,
                 poster_url = poster_url,

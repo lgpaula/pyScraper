@@ -12,8 +12,9 @@ def create_table():
             CREATE TABLE IF NOT EXISTS titles_table (
                 title_id TEXT PRIMARY KEY,
                 title_name TEXT,
-                year_span TEXT,
-                rating TEXT,
+                year_start INTEGER,
+                year_end INTEGER,
+                rating REAL,
                 plot TEXT,
                 poster_url TEXT,
                 runtime TEXT,
@@ -42,9 +43,9 @@ def insert_title(title: Title):
     if not title_exists(title.title_id):
         with sqlite3.connect(DB_NAME) as conn:
             cursor = conn.cursor()
-            cursor.execute("""INSERT INTO titles_table (title_id, title_name, year_span, rating, plot, poster_url, runtime, title_type, genres, original_title) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
-                (title.title_id, title.title_name, title.year_span, title.rating, title.plot, title.poster_url, title.runtime, title.title_type, ",".join(title.genres) 
+            cursor.execute("""INSERT INTO titles_table (title_id, title_name, year_start, year_end, rating, plot, poster_url, runtime, title_type, genres, original_title) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+                (title.title_id, title.title_name, title.year_start, title.year_end, title.rating, title.plot, title.poster_url, title.runtime, title.title_type, ",".join(title.genres) 
                     if title.genres else None, title.original_title))
             conn.commit()
             print(f"Inserted: {title.title_id} - {title.title_name}")
@@ -69,7 +70,8 @@ def update_title(title_id: str, title: Title):
         cursor.execute("""
             UPDATE titles_table 
             SET title_name = ?, 
-                year_span = ?, 
+                year_start = ?, 
+                year_end = ?, 
                 rating = ?, 
                 plot = ?, 
                 poster_url = ?, 
@@ -80,7 +82,8 @@ def update_title(title_id: str, title: Title):
             WHERE title_id = ?
         """, (
             title.title_name,
-            title.year_span,
+            title.year_start,
+            title.year_end,
             title.rating,
             title.plot,
             title.poster_url,

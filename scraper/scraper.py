@@ -131,7 +131,7 @@ if __name__ == "__main__":
     movies = scrape_multiple_titles(criteria)
     create_table()
     for movie in movies:
-        # print(movie.title_name)
+        print(movie.title_name)
         insert_title(movie)
 
     # print(fetch_titles())

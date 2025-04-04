@@ -5,8 +5,9 @@ from typing import List, Optional
 class Title:
     title_id: str
     title_name: str
-    year_span: str
-    rating: str
+    year_start: int
+    year_end: int
+    rating: float
     plot: str
     poster_url: str
     runtime: str
