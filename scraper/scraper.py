@@ -59,7 +59,7 @@ def scrape_multiple_titles(url: str):
         driver.quit()
 
 def scrape_single_title(title_id):
-    driver = setup_driver()
+    driver = setup_driver() #make it global eventually
 
     try:
         url = "https://www.imdb.com/title/" + title_id
@@ -70,8 +70,6 @@ def scrape_single_title(title_id):
         parent2 = driver.find_element(By.XPATH, XPaths.single_title_parent_2)
 
         parse_single_title(parent1, parent2, title_id)
-
-        # return title
 
     finally:
         driver.quit()
@@ -113,28 +111,29 @@ def custom_search_url(params: dict) -> str:
     return base_url + complementary_url
 
 if __name__ == "__main__":
-    criteria = "https://www.imdb.com/search/title/?title_type=feature"
+    scrape_single_title("tt14961016")
+    # criteria = "https://www.imdb.com/search/title/?title_type=feature"
 
-    if (len(sys.argv) > 1):
-        criteria = custom_search_url(json.loads(sys.argv[1]))
-        print(f"Scraping with criteria: {criteria}")
-
-
-    # json_data = '''{"genres":["Animation"],"companies":[],"types":[],"keywords":[],"yearFrom":null,"yearTo":null,"ratingFrom":null,"ratingTo":null}'''
-    # json_data = '''{"genres":["Animation","Biography","Mystery"],"companies":[],"types":["Movie","Series"],"keywords":[],"yearFrom":2000,"yearTo":2010,"ratingFrom":5.0,"ratingTo":null}'''
-    # params_dict = json.loads(json_data)
-    # criteria = custom_search_url(params_dict)
-    # print(f"Scraping with url: {criteria}")
+    # if (len(sys.argv) > 1):
+    #     criteria = custom_search_url(json.loads(sys.argv[1]))
+    #     print(f"Scraping with criteria: {criteria}")
 
 
+    # # json_data = '''{"genres":["Animation"],"companies":[],"types":[],"keywords":[],"yearFrom":null,"yearTo":null,"ratingFrom":null,"ratingTo":null}'''
+    # # json_data = '''{"genres":["Animation","Biography","Mystery"],"companies":[],"types":["Movie","Series"],"keywords":[],"yearFrom":2000,"yearTo":2010,"ratingFrom":5.0,"ratingTo":null}'''
+    # # params_dict = json.loads(json_data)
+    # # criteria = custom_search_url(params_dict)
+    # # print(f"Scraping with url: {criteria}")
 
-    movies = scrape_multiple_titles(criteria)
-    create_table()
-    for movie in movies:
-        print(movie.title_name)
-        insert_title(movie)
 
-    # print(fetch_titles())
+
+    # movies = scrape_multiple_titles(criteria)
+    # create_table()
+    # for movie in movies:
+    #     print(movie.title_name)
+    #     insert_title(movie)
+
+    # # print(fetch_titles())
 
 
 

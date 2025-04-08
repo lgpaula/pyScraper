@@ -12,11 +12,11 @@ def create_table():
             CREATE TABLE IF NOT EXISTS titles_table (
                 title_id TEXT PRIMARY KEY,
                 title_name TEXT,
+                poster_url TEXT,
                 year_start INTEGER,
                 year_end INTEGER,
                 rating REAL,
                 plot TEXT,
-                poster_url TEXT,
                 runtime TEXT,
                 title_type TEXT DEFAULT 'Movie',
                 genres TEXT,
@@ -26,41 +26,36 @@ def create_table():
                 directors TEXT,
                 creators TEXT,
                 schedule TEXT,
-                companies TEXT
+                companies TEXT,
+                updated BOOLEAN DEFAULT 0
             )
         """)
         conn.commit()
 
 def title_exists(title_id: str) -> bool:
-    """Checks if a title with the given title_id exists in the database."""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM titles_table WHERE title_id = ?", (title_id,))
         return cursor.fetchone() is not None
 
 def insert_title(title: Title):
-    """Inserts a title only if its title_id is not already present."""
     if not title_exists(title.title_id):
         with sqlite3.connect(DB_NAME) as conn:
             cursor = conn.cursor()
-            cursor.execute("""INSERT INTO titles_table (title_id, title_name, year_start, year_end, rating, plot, poster_url, runtime, title_type, genres, original_title) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
-                (title.title_id, title.title_name, title.year_start, title.year_end, title.rating, title.plot, title.poster_url, title.runtime, title.title_type, ",".join(title.genres) 
-                    if title.genres else None, title.original_title))
+            cursor.execute("""INSERT INTO titles_table (title_id, title_name, title_type, poster_url) 
+                            VALUES (?, ?, ?, ?)""", (title.title_id, title.title_name, title.title_type, title.poster_url))
             conn.commit()
             print(f"Inserted: {title.title_id} - {title.title_name}")
     else:
         print(f"Skipped (already exists): {title.title_id} - {title.title_name}")
 
 def fetch_titles():
-    """Fetches all titles from the database."""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM titles_table")
         return cursor.fetchall()
 
 def update_title(title_id: str, title: Title):
-    """Updates an existing title in the database."""
     if not title_exists(title_id):
         print(f"Title ID {title_id} not found. Cannot update.")
         return
@@ -69,28 +64,34 @@ def update_title(title_id: str, title: Title):
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE titles_table 
-            SET title_name = ?, 
-                year_start = ?, 
-                year_end = ?, 
-                rating = ?, 
-                plot = ?, 
-                poster_url = ?, 
-                runtime = ?, 
-                title_type = ?, 
-                genres = ?, 
-                original_title = ?
+            SET year_start = ?,
+                year_end = ?,
+                rating = ?,
+                plot = ?,
+                runtime = ?,
+                genres = ?,
+                original_title = ?,
+                stars = ?,
+                writers = ?,
+                directors = ?,
+                creators = ?,
+                companies = ?,
+                updated = ?
             WHERE title_id = ?
         """, (
-            title.title_name,
             title.year_start,
             title.year_end,
             title.rating,
             title.plot,
-            title.poster_url,
             title.runtime,
-            title.title_type,
-            ",".join(title.genres) if title.genres else None,
+            ",".join([g[0] for g in title.genres]) if title.genres else None,
             title.original_title,
+            ",".join([s[0] for s in title.stars]) if title.stars else None,
+            ",".join([w[0] for w in title.writers]) if title.writers else None,
+            ",".join([d[0] for d in title.directors]) if title.directors else None,
+            ",".join([c[0] for c in title.creators]) if title.creators else None,
+            ",".join([c[0] for c in title.companies]) if title.companies else None,
+            1,
             title_id
         ))
         conn.commit()
