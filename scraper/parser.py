@@ -78,12 +78,6 @@ def get_genres(parent1):
 
     return genres
 
-def get_schedule(parent1):
-    try:
-        schedule = parent1.find_element(By.CLASS_NAME, XPaths.title_schedule)
-    except NoSuchElementException:
-        schedule = None
-
 def get_original_title(parent2):
     json_text = parent2.get_attribute("innerHTML")
     data = json.loads(json_text)
@@ -123,7 +117,8 @@ def get_runtime(parent2):
     json_text = parent2.get_attribute("innerHTML")
     data = json.loads(json_text)
 
-    runtime = data["props"]["pageProps"]["aboveTheFoldData"]["runtime"]
+    runtime = data["props"]["pageProps"]["aboveTheFoldData"]["runtime"]["displayableProperty"]["value"]["plainText"]
+    return runtime
 
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
