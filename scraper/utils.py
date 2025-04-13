@@ -52,3 +52,4 @@ class XPaths:
     title_metadata_container = "ipc-metadata-list-item__content-container"
     title_schedule = "sc-5766672e-2"
     title_original_title = "sc-ec65ba05-1"
+    title_schedule = ".//*[@data-testid='tm-box-up-date']"

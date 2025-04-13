@@ -136,6 +136,13 @@ def get_runtime(parent2):
     except (KeyError, TypeError, AttributeError):
         return ""
 
+def get_schedule(parent1):
+    try:
+        schedule = parent1.find_element(By.XPATH, ".//*[@data-testid='tm-box-up-date']").text
+    except NoSuchElementException:
+        schedule = ""
+    return schedule
+
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
     genres = get_genres(parent1)
@@ -145,6 +152,7 @@ def parse_single_title(parent1, parent2, title_id):
     rating = get_rating(parent2)
     plot = get_plot(parent2)
     runtime = get_runtime(parent2)
+    schedule = get_schedule(parent1)
 
     # Extract creators and stars
     metadata_items = parent1.find_elements(By.CLASS_NAME, XPaths.title_metadata)
@@ -199,7 +207,8 @@ def parse_single_title(parent1, parent2, title_id):
         writers = writers,
         directors = directors,
         creators = creators,
-        companies = companies
+        companies = companies,
+        schedule = schedule,
     )
 
     update_title(title_id, curr_title)

@@ -76,6 +76,7 @@ def update_title(title_id: str, title: Title):
                 directors = ?,
                 creators = ?,
                 companies = ?,
+                schedule = ?,
                 updated = ?
             WHERE title_id = ?
         """, (
@@ -91,6 +92,7 @@ def update_title(title_id: str, title: Title):
             ",".join([d[0] for d in title.directors]) if title.directors else None,
             ",".join([c[0] for c in title.creators]) if title.creators else None,
             ",".join([c[0] for c in title.companies]) if title.companies else None,
+            title.schedule,
             1,
             title_id
         ))
