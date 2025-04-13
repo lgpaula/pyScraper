@@ -10,11 +10,11 @@ class Title:
     year_end: int = ""
     rating: float = ""
     plot: str = ""
-    runtime: str = None
+    runtime: str = ""
     title_type: str = "Movie"
-    genres: List[str] = ""
+    genres: str = ""
     original_title: str = ""
-    stars: List[str] = ""
+    stars: str = ""
     writers: str = ""
     directors: str = ""
     creators: str = ""
@@ -45,7 +45,7 @@ class XPaths:
     title_plot = "ipc-html-content-inner-div"
     title_poster = ".//div[contains(@class, 'ipc-media')]/img"
     title_runtime = "hvVhYi" #sc-e8bccfea-7
-    title_type = "sc-d5ea4b9d-4"
+    title_type = "dli-title-type-data"
     title_genres = "ipc-chip-list__scroller"
     title_metadata = "ipc-metadata-list__item"
     title_metadata_label = "ipc-metadata-list-item__label"

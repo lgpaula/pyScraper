@@ -24,6 +24,11 @@ def parse_title_list(title_div_list):
                 srcset_links = srcset.split(", ")
                 last_link = srcset_links[-1].split(" ")[0]
                 poster_url = last_link
+                # update link's ending so it's bigger
+                # ex:
+                # https://m.media-amazon.com/images/M/MV5BYzFjMzNjOTktNDBlNy00YWZhLWExYTctZDcxNDA4OWVhOTJjXkEyXkFqcGc@._V1_QL75_UX280_CR0,0,280,414_.jpg
+                # to
+                # https://m.media-amazon.com/images/M/MV5BYzFjMzNjOTktNDBlNy00YWZhLWExYTctZDcxNDA4OWVhOTJjXkEyXkFqcGc@._V1_QL75_UX560_CR0,0,560,828_.jpg
             except NoSuchElementException:
                 poster_url = ""
 
