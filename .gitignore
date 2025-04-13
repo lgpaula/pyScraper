@@ -173,3 +173,9 @@ cython_debug/
 # databases
 *.sqlite
 *.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# custom json
+*.json
