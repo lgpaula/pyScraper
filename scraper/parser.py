@@ -122,8 +122,19 @@ def get_runtime(parent2):
     json_text = parent2.get_attribute("innerHTML")
     data = json.loads(json_text)
 
-    runtime = data["props"]["pageProps"]["aboveTheFoldData"]["runtime"]["displayableProperty"]["value"]["plainText"]
-    return runtime
+    try:
+        runtime_data = data.get("props", {}) \
+                           .get("pageProps", {}) \
+                           .get("aboveTheFoldData", {}) \
+                           .get("runtime") or {}
+
+        displayable_property = runtime_data.get("displayableProperty")
+        if displayable_property:
+            return displayable_property["value"]["plainText"]
+        else:
+            return ""
+    except (KeyError, TypeError, AttributeError):
+        return ""
 
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
