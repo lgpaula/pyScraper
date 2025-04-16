@@ -20,6 +20,7 @@ class Title:
     creators: str = ""
     schedule: str = ""
     companies: str = ""
+    season_count: str = ""
 
 # dicts or nosql?
 dict_id_stars = {}
@@ -40,16 +41,9 @@ class XPaths:
     single_title_parent_2 = '//script[@id="__NEXT_DATA__"]'
     title_name = "ipc-title__text"
     title_id = "ipc-lockup-overlay"
-    title_year = "hvVhYi" #sc-e8bccfea-7
-    title_rating = "ipc-rating-star--rating"
-    title_plot = "ipc-html-content-inner-div"
     title_poster = ".//div[contains(@class, 'ipc-media')]/img"
-    title_runtime = "hvVhYi" #sc-e8bccfea-7
     title_type = "dli-title-type-data"
     title_genres = "ipc-chip-list__scroller"
     title_metadata = "ipc-metadata-list__item"
     title_metadata_label = "ipc-metadata-list-item__label"
     title_metadata_container = "ipc-metadata-list-item__content-container"
-    title_schedule = "sc-5766672e-2"
-    title_original_title = "sc-ec65ba05-1"
-    title_schedule = ".//*[@data-testid='tm-box-up-date']"

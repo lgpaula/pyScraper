@@ -1,5 +1,5 @@
 import sqlite3
-from utils import Title
+from scraper.utils import Title
 
 # Database setup
 DB_NAME = "cinelog.db"
@@ -100,13 +100,20 @@ def update_title(title_id: str, title: Title):
         print(f"Updated: {title_id}")
         print_title(title_id)
 
-def print_title(id):
+def print_title(title_id):
     """Prints the title with the given title_id."""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM titles_table WHERE title_id = ?", (id,))
+        cursor.execute("SELECT * FROM titles_table WHERE title_id = ?", (title_id))
         title = cursor.fetchone()
         if title:
             print(title)
         else:
             print(f"Title ID {id} not found.")
+
+def get_season_count(title_id):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT season_count FROM titles_tabl WHERE title_id = ?", (title_id))
+        count = cursor.fetchone()
+        return count

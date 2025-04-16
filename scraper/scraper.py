@@ -1,3 +1,4 @@
+import datetime
 from urllib.parse import urlencode
 import os
 import sys
@@ -71,6 +72,38 @@ def scrape_single_title(title_id):
 
         parse_single_title(parent1, parent2, title_id)
 
+    finally:
+        driver.quit()
+
+def fetch_episode_dates(title_id):
+    driver = setup_driver()
+    season_count = get_season_count(title_id)
+
+    try:
+        url = f"https://www.imdb.com/title/{title_id}/episodes/?season={season_count}"
+        driver.get(url)
+        time.sleep(1)
+
+        episodes = driver.find_elements(By.CSS_SELECTOR, "article.episode-item-wrapper")
+        dates = []
+
+        for ep in episodes:
+            try:
+                span = ep.find_element(By.CSS_SELECTOR, "span").text.strip()
+                if not span:
+                    continue
+
+                try:
+                    dt = datetime.strptime(span, "%a, %b %d, %Y")
+                    dates.append(dt.date().isoformat())
+                except ValueError:
+                    continue
+
+            except Exception:
+                continue
+
+        return dates
+    
     finally:
         driver.quit()
 

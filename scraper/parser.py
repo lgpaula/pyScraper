@@ -136,12 +136,25 @@ def get_runtime(parent2):
     except (KeyError, TypeError, AttributeError):
         return ""
 
-def get_schedule(parent1):
-    try:
-        schedule = parent1.find_element(By.XPATH, ".//*[@data-testid='tm-box-up-date']").text
-    except NoSuchElementException:
-        schedule = ""
-    return schedule
+def get_season_count(parent2, year_end):
+    json_text = parent2.get_attribute("innerHTML")
+    data = json.loads(json_text)
+
+    canHaveEpisodes = data["props"]["pageProps"]["aboveTheFoldData"]["canHaveEpisodes"]
+
+    if not canHaveEpisodes and not year_end: return ""
+
+    seasons = data["props"]["pageProps"]["mainColumnData"]["episodes"]["seasons"]
+    seasonCount = seasonCount = len(seasons)
+
+    return seasonCount
+
+    # go to website https://www.imdb.com/title/{title_id}/episodes/?season={seasonCount}
+    # for each article of type "episode-item-wrapper", get the first <span class></span> text
+    # convert text to ISO 8601 format
+    # append to return string sepaprated by commas
+    # return string
+
 
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
@@ -152,7 +165,7 @@ def parse_single_title(parent1, parent2, title_id):
     rating = get_rating(parent2)
     plot = get_plot(parent2)
     runtime = get_runtime(parent2)
-    schedule = get_schedule(parent1)
+    season_count = get_season_count(parent2, year_end, title_id)
 
     # Extract creators and stars
     metadata_items = parent1.find_elements(By.CLASS_NAME, XPaths.title_metadata)
@@ -208,7 +221,7 @@ def parse_single_title(parent1, parent2, title_id):
         directors = directors,
         creators = creators,
         companies = companies,
-        schedule = schedule,
+        season_count = season_count,
     )
 
     update_title(title_id, curr_title)
