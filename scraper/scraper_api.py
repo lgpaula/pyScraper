@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import subprocess
 from scraper import scrape_single_title
+from scraper import fetch_episode_dates
 
 app = Flask(__name__)
 
@@ -26,13 +27,22 @@ def scrape():
         print(f"Unexpected Error: {str(e)}")  # Catch all errors
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/scrape/<title_id>', methods=['POST'])
+@app.route("/scrape/<title_id>", methods=["POST"])
 def trigger_scrape(title_id):
     try:
         scrape_single_title(title_id)
-        return jsonify({'status': 'success'}), 200
+        return jsonify({"status": "success"}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/fetch_episodes/<title_id>", methods=["GET"])
+def fetch_dates(title_id):
+    try:
+        fetch_episode_dates(title_id)
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=True, threaded=True)
