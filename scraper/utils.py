@@ -36,7 +36,7 @@ class XPaths:
     scroll_into_view = "arguments[0].scrollIntoView(true);"
     multi_title_parent = "sc-e22973a9-0"
     multi_title_item = "ipc-metadata-list-summary-item"
-    single_title_parent_1 = "sc-9a2a0028-0"
+    single_title_parent_1 = "ipc-page-section--bp-xs"
     single_title_parent_2 = '//script[@id="__NEXT_DATA__"]'
     title_name = "ipc-title__text"
     title_id = "ipc-lockup-overlay"

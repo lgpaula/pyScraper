@@ -1,6 +1,6 @@
 import json
 import re
-from .utils import *
+from utils import *
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from db.database import update_title
@@ -157,7 +157,7 @@ def parse_single_title(parent1, parent2, title_id):
     rating = get_rating(parent2)
     plot = get_plot(parent2)
     runtime = get_runtime(parent2)
-    season_count = get_season_count(parent2, year_end, title_id)
+    season_count = get_season_count(parent2, year_end)
 
     # Extract creators and stars
     metadata_items = parent1.find_elements(By.CLASS_NAME, XPaths.title_metadata)

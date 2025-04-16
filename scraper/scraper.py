@@ -9,8 +9,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from .parser import *
-from .utils import XPaths
+from parser import *
+from utils import XPaths
 from db.database import *
 
 
@@ -145,12 +145,12 @@ def custom_search_url(params: dict) -> str:
     return base_url + complementary_url
 
 if __name__ == "__main__":
-    # scrape_single_title("tt14961016")
-    criteria = "https://www.imdb.com/search/title/?title_type=feature"
+    scrape_single_title("tt31510819")
+    # criteria = "https://www.imdb.com/search/title/?title_type=feature,tv_series"
 
-    if (len(sys.argv) > 1):
-        criteria = custom_search_url(json.loads(sys.argv[1]))
-        print(f"Scraping with criteria: {criteria}")
+    # if (len(sys.argv) > 1):
+    #     criteria = custom_search_url(json.loads(sys.argv[1]))
+    #     print(f"Scraping with criteria: {criteria}")
 
 
     # json_data = '''{"genres":["Animation"],"companies":[],"types":[],"keywords":[],"yearFrom":null,"yearTo":null,"ratingFrom":null,"ratingTo":null}'''
@@ -161,11 +161,11 @@ if __name__ == "__main__":
 
 
 
-    movies = scrape_multiple_titles(criteria)
-    create_table()
-    for movie in movies:
-        print(movie.title_name)
-        insert_title(movie)
+    # movies = scrape_multiple_titles(criteria)
+    # create_table()
+    # for movie in movies:
+    #     print(movie.title_name)
+    #     insert_title(movie)
 
     # print(fetch_titles())
 
