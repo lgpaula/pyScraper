@@ -1,5 +1,5 @@
 import sqlite3
-from scraper.utils import Title
+from utils import Title
 
 # Database setup
 DB_NAME = "cinelog.db"
