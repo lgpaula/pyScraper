@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from urllib.parse import urlencode
 import os
 import sys
@@ -8,7 +8,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from parser import *
 from utils import XPaths
 from db.database import *
@@ -75,26 +76,33 @@ def scrape_single_title(title_id):
     finally:
         driver.quit()
 
-def fetch_episode_dates(title_id):
+def fetch_episode_dates(title_id, season_count):
     driver = setup_driver()
-    season_count = get_season_count(title_id)
 
     try:
         url = f"https://www.imdb.com/title/{title_id}/episodes/?season={season_count}"
+        print (url)
         driver.get(url)
-        time.sleep(1)
+
+        # Wait up to 10 seconds for episode items to load
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper"))
+            )
+        except Exception as e:
+            print("Episode items did not load:", e)
+            return []
 
         episodes = driver.find_elements(By.CSS_SELECTOR, "article.episode-item-wrapper")
         dates = []
 
         for ep in episodes:
             try:
-                span = ep.find_element(By.CSS_SELECTOR, "span").text.strip()
-                if not span:
-                    continue
+                date_span = ep.find_element(By.XPATH, ".//span[contains(text(), ',')]")
+                date_text = date_span.text.strip()
 
                 try:
-                    dt = datetime.strptime(span, "%a, %b %d, %Y")
+                    dt = datetime.strptime(date_text, "%a, %b %d, %Y")
                     dates.append(dt.date().isoformat())
                 except ValueError:
                     continue
@@ -146,20 +154,12 @@ def custom_search_url(params: dict) -> str:
 
 if __name__ == "__main__":
     # scrape_single_title("tt31510819")
+
     criteria = "https://www.imdb.com/search/title/?title_type=feature,tv_series"
 
     if (len(sys.argv) > 1):
         criteria = custom_search_url(json.loads(sys.argv[1]))
         print(f"Scraping with criteria: {criteria}")
-
-
-    # json_data = '''{"genres":["Animation"],"companies":[],"types":[],"keywords":[],"yearFrom":null,"yearTo":null,"ratingFrom":null,"ratingTo":null}'''
-    # json_data = '''{"genres":["Animation","Biography","Mystery"],"companies":[],"types":["Movie","Series"],"keywords":[],"yearFrom":2000,"yearTo":2010,"ratingFrom":5.0,"ratingTo":null}'''
-    # params_dict = json.loads(json_data)
-    # criteria = custom_search_url(params_dict)
-    # print(f"Scraping with url: {criteria}")
-
-
 
     movies = scrape_multiple_titles(criteria)
     create_table()
@@ -167,9 +167,7 @@ if __name__ == "__main__":
         print(movie.title_name)
         insert_title(movie)
 
-    # print(fetch_titles())
-
-
+    # print(fetch_episode_dates("tt31510819", 1))
 
 
 '''

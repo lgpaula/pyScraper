@@ -35,11 +35,13 @@ def trigger_scrape(title_id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route("/fetch_episodes/<title_id>", methods=["GET"])
-def fetch_dates(title_id):
+@app.route('/fetch_episodes', methods=['GET'])
+def fetch_episodes():
+    title_id = request.args.get('title_id')
+    season_count = request.args.get('season_count')
     try:
-        fetch_episode_dates(title_id)
-        return jsonify({"status": "success"}), 200
+        episode_data = fetch_episode_dates(title_id, season_count)
+        return jsonify({"status": "success", "data": episode_data}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
