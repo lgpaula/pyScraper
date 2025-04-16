@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 @dataclass
 class Title:
@@ -20,6 +19,7 @@ class Title:
     creators: str = ""
     companies: str = ""
     season_count: str = ""
+    schedule_list: str = ""
 
 # dicts or nosql?
 dict_id_stars = {}

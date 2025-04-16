@@ -102,6 +102,7 @@ def fetch_episode_dates(title_id):
             except Exception:
                 continue
 
+        add_schedule_to_title(title_id, dates)
         return dates
     
     finally:

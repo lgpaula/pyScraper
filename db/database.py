@@ -27,6 +27,7 @@ def create_table():
                 creators TEXT,
                 companies TEXT,
                 season_count TEXT,
+                schedule_list TEXT,
                 updated BOOLEAN DEFAULT 0
             )
         """)
@@ -113,6 +114,12 @@ def print_title(title_id):
 def get_season_count(title_id):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT season_count FROM titles_tabl WHERE title_id = ?", (title_id))
+        cursor.execute("SELECT season_count FROM titles_table WHERE title_id = ?", (title_id))
         count = cursor.fetchone()
         return count
+    
+def add_schedule_to_title(title_id, dates):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE schedule_list FROM titles_table WHERE title_id = ?", (title_id))
+        conn.commit()
