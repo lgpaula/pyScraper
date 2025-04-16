@@ -18,7 +18,6 @@ class Title:
     writers: str = ""
     directors: str = ""
     creators: str = ""
-    schedule: str = ""
     companies: str = ""
     season_count: str = ""
 
