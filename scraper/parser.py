@@ -1,7 +1,6 @@
 import json
 import re
-from utils import Title
-from utils import XPaths
+from .utils import *
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from db.database import update_title
@@ -148,13 +147,6 @@ def get_season_count(parent2, year_end):
     seasonCount = seasonCount = len(seasons)
 
     return seasonCount
-
-    # go to website https://www.imdb.com/title/{title_id}/episodes/?season={seasonCount}
-    # for each article of type "episode-item-wrapper", get the first <span class></span> text
-    # convert text to ISO 8601 format
-    # append to return string sepaprated by commas
-    # return string
-
 
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)
