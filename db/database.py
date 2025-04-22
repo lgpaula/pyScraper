@@ -6,7 +6,6 @@ from utils import Title
 DB_NAME = "cinelog.db"
 
 def create_table():
-    """Creates the 'titles_table' table if it does not exist."""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -20,18 +19,59 @@ def create_table():
                 plot TEXT,
                 runtime TEXT,
                 title_type TEXT DEFAULT 'Movie',
-                genres TEXT,
                 original_title TEXT,
-                stars TEXT,
-                writers TEXT,
-                directors TEXT,
-                creators TEXT,
-                companies TEXT,
                 season_count TEXT,
                 schedule_list TEXT,
                 updated BOOLEAN DEFAULT 0
             )
         """)
+        conn.commit()
+
+    create_extras_tables()
+
+def create_extras_tables():
+    entity_tables = [
+        'genres_table',
+        'cast_table',
+        'writers_table',
+        'creators_table',
+        'directors_table',
+        'companies_table'
+    ]
+
+    join_tables = {
+        'title_genre': 'genres_table',
+        'title_cast': 'cast_table',
+        'title_writer': 'writers_table',
+        'title_creator': 'creators_table',
+        'title_director': 'directors_table',
+        'title_company': 'companies_table'
+    }
+
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+
+        # Create entity tables
+        for table in entity_tables:
+            cursor.execute(f"""
+                CREATE TABLE IF NOT EXISTS {table} (
+                    id TEXT PRIMARY KEY,
+                    name TEXT
+                )
+            """)
+
+        # Create join tables
+        for join_table, entity_table in join_tables.items():
+            cursor.execute(f"""
+                CREATE TABLE IF NOT EXISTS {join_table} (
+                    title_id TEXT,
+                    {entity_table.replace('_table', '')}_id TEXT,
+                    PRIMARY KEY (title_id, {entity_table.replace('_table', '')}_id),
+                    FOREIGN KEY (title_id) REFERENCES titles_table(title_id),
+                    FOREIGN KEY ({entity_table.replace('_table', '')}_id) REFERENCES {entity_table}(id)
+                )
+            """)
+
         conn.commit()
 
 def title_exists(title_id: str) -> bool:
@@ -71,13 +111,7 @@ def update_title(title_id: str, title: Title):
                 rating = ?,
                 plot = ?,
                 runtime = ?,
-                genres = ?,
                 original_title = ?,
-                stars = ?,
-                writers = ?,
-                directors = ?,
-                creators = ?,
-                companies = ?,
                 season_count = ?,
                 updated = ?
             WHERE title_id = ?
@@ -87,13 +121,7 @@ def update_title(title_id: str, title: Title):
             title.rating,
             title.plot,
             title.runtime,
-            ",".join([g[0] for g in title.genres]) if title.genres else None,
             title.original_title,
-            ",".join([s[0] for s in title.stars]) if title.stars else None,
-            ",".join([w[0] for w in title.writers]) if title.writers else None,
-            ",".join([d[0] for d in title.directors]) if title.directors else None,
-            ",".join([c[0] for c in title.creators]) if title.creators else None,
-            ",".join([c[0] for c in title.companies]) if title.companies else None,
             title.season_count,
             1,
             title_id
@@ -102,8 +130,73 @@ def update_title(title_id: str, title: Title):
         print(f"Updated: {title_id}")
         print_title(title_id)
 
+        smart_upsert_extras("genres_table", title.genres)
+        update_title_relations(title_id, "genres_table", title.genres)
+
+        smart_upsert_extras("cast_table", title.stars)
+        update_title_relations(title_id, "cast_table", title.stars)
+
+        smart_upsert_extras("writers_table", title.writers)
+        update_title_relations(title_id, "writers_table", title.writers)
+
+        smart_upsert_extras("creators_table", title.creators)
+        update_title_relations(title_id, "creators_table", title.creators)
+
+        smart_upsert_extras("directors_table", title.directors)
+        update_title_relations(title_id, "directors_table", title.directors)
+
+        smart_upsert_extras("companies_table", title.companies)
+        update_title_relations(title_id, "companies_table", title.companies)
+
+def smart_upsert_extras(table_name: str, entries: list[list[str]]):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        for name, entry_id in entries:
+            cursor.execute(
+                f"SELECT name FROM {table_name} WHERE id = ?",
+                (entry_id,)
+            )
+            result = cursor.fetchone()
+
+            if result is None:
+                cursor.execute(
+                    f"INSERT INTO {table_name} (id, name) VALUES (?, ?)",
+                    (entry_id, name)
+                )
+            elif result[0] != name:
+                cursor.execute(
+                    f"UPDATE {table_name} SET name = ? WHERE id = ?",
+                    (name, entry_id)
+                )
+        conn.commit()
+
+def update_title_relations(title_id: str, table_name: str, entries: list[list[str]]):
+    """Insert title-to-entity relations in join tables."""
+    join_tables = {
+        'genres_table': 'title_genre',
+        'cast_table': 'title_cast',
+        'writers_table': 'title_writer',
+        'creators_table': 'title_creator',
+        'directors_table': 'title_director',
+        'companies_table': 'title_company'
+    }
+
+    join_table = join_tables[table_name]
+    column = f"{table_name.replace('_table', '')}_id"
+
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(f"DELETE FROM {join_table} WHERE title_id = ?", (title_id,))
+
+        for name, entry_id in entries:
+            cursor.execute(f"""
+                INSERT OR IGNORE INTO {join_table} (title_id, {column})
+                VALUES (?, ?)
+            """, (title_id, entry_id))
+        conn.commit()
+
 def print_title(title_id):
-    """Prints the title with the given title_id."""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM titles_table WHERE title_id = ?", (title_id,))

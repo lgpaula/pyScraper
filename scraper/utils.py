@@ -21,13 +21,6 @@ class Title:
     season_count: str = ""
     schedule_list: str = ""
 
-# dicts or nosql?
-dict_id_stars = {}
-dict_id_writer = {}
-dict_id_company = {}
-dict_id_creator = {}
-dict_id_director = {}
-
 # x-path & class strings
 @dataclass(frozen = True)
 class XPaths:

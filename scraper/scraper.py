@@ -153,7 +153,7 @@ def custom_search_url(params: dict) -> str:
     return base_url + complementary_url
 
 if __name__ == "__main__":
-    # scrape_single_title("tt31510819")
+    # scrape_single_title("tt2085059")
 
     criteria = "https://www.imdb.com/search/title/?title_type=feature,tv_series"
 
@@ -164,7 +164,6 @@ if __name__ == "__main__":
     movies = scrape_multiple_titles(criteria)
     create_table()
     for movie in movies:
-        print(movie.title_name)
         insert_title(movie)
 
     # print(fetch_episode_dates("tt31510819", 1))
