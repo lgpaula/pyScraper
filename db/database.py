@@ -22,6 +22,7 @@ def create_table():
                 original_title TEXT,
                 season_count TEXT,
                 schedule_list TEXT,
+                created_on TEXT DEFAULT (strftime('%Y-%m-%d %H:%M', 'now')),
                 updated BOOLEAN DEFAULT 0
             )
         """)
