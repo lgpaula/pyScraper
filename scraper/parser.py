@@ -54,11 +54,6 @@ def parse_title_list(title_div_list):
         print("Missing expected key in JSON:", e)
         return []
 
-# add unknown stars to dict(id, stars)
-# add unknown genres to dict(id, genre)
-# add unknown writer to dict(id, writer)
-# add unknown company to dict(id, company)
-
 def get_companies(parent2):
     json_text = parent2.get_attribute("innerHTML")
     data = json.loads(json_text)

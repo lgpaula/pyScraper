@@ -28,26 +28,27 @@ def setup_driver():
 
 def scrape_multiple_titles(url: str):
     driver = setup_driver()
+    wait = WebDriverWait(driver, 10)
 
     try:
         driver.get(url)
-        time.sleep(1)  # A better approach would be WebDriverWait
+        wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
 
         # Remove consent banner
         try:
             bannerButton = driver.find_element(By.CSS_SELECTOR, XPaths.banner_element)
             bannerButton.click()
-            time.sleep(1)
+            wait.until_not(EC.presence_of_element_located((By.CSS_SELECTOR, XPaths.banner_element)))
         except Exception as e:
             print("No consent banner found or click failed:", e)
 
         # Click "See more" button (maybe multiple times)
         try:
-            button = driver.find_element(By.CLASS_NAME, XPaths.see_more_button)
+            button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
             driver.execute_script(XPaths.scroll_into_view, button)
-            time.sleep(1)
             button.click()
-            time.sleep(1)
+            # Wait until new items are loaded
+            wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, XPaths.multi_title_item)) > 0)
         except Exception as e:
             print("No button found or click failed:", e)
 
@@ -78,6 +79,7 @@ def scrape_single_title(title_id):
 
 def fetch_episode_dates(title_id, season_count):
     driver = setup_driver()
+    wait = WebDriverWait(driver, 10)
 
     try:
         url = f"https://www.imdb.com/title/{title_id}/episodes/?season={season_count}"
@@ -86,7 +88,7 @@ def fetch_episode_dates(title_id, season_count):
 
         # Wait up to 10 seconds for episode items to load
         try:
-            WebDriverWait(driver, 10).until(
+            wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper"))
             )
         except Exception as e:
