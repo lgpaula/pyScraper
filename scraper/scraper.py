@@ -26,7 +26,7 @@ def setup_driver():
     driver.set_page_load_timeout(120)
     return driver
 
-def scrape_multiple_titles(url: str):
+def scrape_multiple_titles(url: str, quantity: int):
     driver = setup_driver()
     wait = WebDriverWait(driver, 10)
 
@@ -42,17 +42,17 @@ def scrape_multiple_titles(url: str):
         except Exception as e:
             print("No consent banner found or click failed:", e)
 
-        # Click "See more" button (maybe multiple times)
         try:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(1)
+            for _ in range(quantity // 50):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1)
 
-            button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
-            driver.execute_script(XPaths.scroll_into_view, button)
-            button.click()
-            # Wait until new items are loaded
-            time.sleep(1)
-            wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, XPaths.multi_title_item)) > 0)
+                button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
+                driver.execute_script(XPaths.scroll_into_view, button)
+                button.click()
+                # Wait until new items are loaded
+                time.sleep(1)
+                wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, XPaths.multi_title_item)) > 0)
         except Exception as e:
             print("No button found or click failed:", e)
 
@@ -161,20 +161,19 @@ def custom_search_url(params: dict) -> str:
 if __name__ == "__main__":
     # scrape_single_title("tt2085059")
 
-    start_time = time.time()
     criteria = "https://www.imdb.com/search/title/?title_type=feature,tv_series"
+    quantity = 50
 
-    if (len(sys.argv) > 1):
+    if len(sys.argv) > 1:
         criteria = custom_search_url(json.loads(sys.argv[1]))
         print(f"Scraping with criteria: {criteria}")
+    if len(sys.argv) > 2:
+        quantity = int(sys.argv[2])
 
-    movies = scrape_multiple_titles(criteria)
+    movies = scrape_multiple_titles(criteria, quantity)
     create_table()
     for movie in movies:
         insert_title(movie)
-
-    final_time = time.time() - start_time
-    print (final_time)
 
     # print(fetch_episode_dates("tt31510819", 1))
 

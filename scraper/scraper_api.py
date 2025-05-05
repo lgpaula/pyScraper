@@ -12,10 +12,17 @@ def health():
 @app.route("/scrape", methods=["GET"])
 def scrape():
     criteria = request.args.get('criteria', '')
-    print(f"Received request with criteria: {criteria}")
+    quantity = request.args.get('quantity', '50')
+    print(f"Received request with criteria: {criteria} and quantity: {quantity}")
 
     try:
-        result = subprocess.run(["python3", "scraper.py", criteria], capture_output=True, text=True, check=True, timeout=120)
+        result = subprocess.run(
+            ["python3", "scraper.py", criteria, quantity],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=(quantity/3)
+        )
         print(f"Scraper Output: {result.stdout}")  # Log scraper output
         return jsonify({"success": True, "output": result.stdout.strip()})
     
