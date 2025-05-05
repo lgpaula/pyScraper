@@ -12,26 +12,27 @@ def health():
 @app.route("/scrape", methods=["GET"])
 def scrape():
     criteria = request.args.get('criteria', '')
-    quantity = request.args.get('quantity', '50')
-    print(f"Received request with criteria: {criteria} and quantity: {quantity}")
+    quantity_str = request.args.get('quantity', '50')
+    print(f"Received request with criteria: {criteria} and quantity: {quantity_str}")
 
     try:
+        quantity = int(quantity_str)
         result = subprocess.run(
-            ["python3", "scraper.py", criteria, quantity],
+            ["python3", "scraper.py", criteria, str(quantity)],
             capture_output=True,
             text=True,
             check=True,
-            timeout=(quantity/3)
+            timeout=(quantity / 3)
         )
-        print(f"Scraper Output: {result.stdout}")  # Log scraper output
+        print(f"Scraper Output: {result.stdout}")
         return jsonify({"success": True, "output": result.stdout.strip()})
     
     except subprocess.CalledProcessError as e:
-        print(f"Scraper Error: {e.stderr}")  # Log scraper errors
+        print(f"Scraper Error: {e.stderr}")
         return jsonify({"success": False, "error": e.stderr.strip()}), 500
 
     except Exception as e:
-        print(f"Unexpected Error: {str(e)}")  # Catch all errors
+        print(f"Unexpected Error: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/scrape/<title_id>", methods=["POST"])

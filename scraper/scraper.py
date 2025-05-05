@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from parser import *
 from utils import XPaths
 from db.database import *
@@ -18,7 +19,8 @@ from db.database import *
 def setup_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/XX.0.0.0 Safari/537.36")
     chrome_options.add_argument("--start-maximized")
 
     service = Service()
@@ -36,14 +38,16 @@ def scrape_multiple_titles(url: str, quantity: int):
 
         # Remove consent banner
         try:
-            bannerButton = driver.find_element(By.CSS_SELECTOR, XPaths.banner_element)
+            bannerButton = WebDriverWait(driver, 3).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, XPaths.banner_element))
+            )
             bannerButton.click()
             wait.until_not(EC.presence_of_element_located((By.CSS_SELECTOR, XPaths.banner_element)))
-        except Exception as e:
+        except (TimeoutException, NoSuchElementException, Exception) as e:
             print("No consent banner found or click failed:", e)
 
         try:
-            for _ in range(quantity // 50):
+            for _ in range((quantity // 50) - 1):
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(1)
 
