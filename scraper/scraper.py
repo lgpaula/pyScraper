@@ -70,7 +70,7 @@ def scrape_multiple_titles(url: str, quantity: int):
         driver.quit()
 
 def scrape_single_title(title_id):
-    driver = setup_driver() #make it global eventually
+    driver = setup_driver()
 
     try:
         url = "https://www.imdb.com/title/" + title_id

@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import scraper
 from utils import Title
 
 # Database setup
@@ -90,7 +91,18 @@ def insert_title(title: Title):
             conn.commit()
             print(f"Inserted: {title.title_id} - {title.title_name}")
     else:
+        scraper.scrape_single_title(title.title_id)
+        update_title_date(title.title_id)
         print(f"Skipped (already exists): {title.title_id} - {title.title_name}")
+
+def update_title_date(title_id: str):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""UPDATE titles_table
+            SET created_on = strftime('%Y-%m-%d %H:%M', 'now')
+            WHERE title_id = ?""", (title_id,))
+        conn.commit()
+        print(f"Updated 'created_on' for: {title_id}")
 
 def fetch_titles():
     with sqlite3.connect(DB_NAME) as conn:
