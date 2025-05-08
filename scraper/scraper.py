@@ -28,7 +28,7 @@ def setup_driver():
     driver.set_page_load_timeout(120)
     return driver
 
-def scrape_multiple_titles(url: str, quantity: int):
+def scrape_multiple_titles(url: str, quantity = 50):
     driver = setup_driver()
     wait = WebDriverWait(driver, 10)
 
@@ -162,22 +162,24 @@ def custom_search_url(params: dict) -> str:
 
     return base_url + complementary_url
 
+def scraper_main(criteria, quantity):
+    criteria_url = custom_search_url(criteria)
+    movies = scrape_multiple_titles(criteria_url, quantity)
+    create_table()
+
+    inserted = 0
+    for movie in movies:
+        if insert_title(movie):
+            inserted += 1
+
+    return inserted
+
 if __name__ == "__main__":
     # scrape_single_title("tt2085059")
 
-    criteria = "https://www.imdb.com/search/title/?title_type=feature,tv_series"
+    criteria = {"genres": [], "companies": [], "types": ["Movie", "Series", "Short", "TV Movie", "TV Special", "TV Mini-Series"], "yearFrom": None, "yearTo": None, "ratingFrom": 0.0, "ratingTo": 10.0}
     quantity = 50
-
-    if len(sys.argv) > 1:
-        criteria = custom_search_url(json.loads(sys.argv[1]))
-        print(f"Scraping with criteria: {criteria}")
-    if len(sys.argv) > 2:
-        quantity = int(sys.argv[2])
-
-    movies = scrape_multiple_titles(criteria, quantity)
-    create_table()
-    for movie in movies:
-        insert_title(movie)
+    scraper_main(criteria, quantity)
 
     # print(fetch_episode_dates("tt31510819", 1))
 

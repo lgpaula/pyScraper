@@ -90,10 +90,12 @@ def insert_title(title: Title):
                             VALUES (?, ?, ?, ?)""", (title.title_id, title.title_name, title.title_type, title.poster_url))
             conn.commit()
             print(f"Inserted: {title.title_id} - {title.title_name}")
+        return True
     else:
-        scraper.scrape_single_title(title.title_id)
+        # scrape season_count and eps
         update_title_date(title.title_id)
         print(f"Skipped (already exists): {title.title_id} - {title.title_name}")
+        return False
 
 def update_title_date(title_id: str):
     with sqlite3.connect(DB_NAME) as conn:
