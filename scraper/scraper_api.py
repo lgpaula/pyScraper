@@ -11,24 +11,23 @@ app = Flask(__name__)
 def health():
     return jsonify({"status": "running"}), 200
 
-@app.route("/scrape", methods=["GET"])
+@app.route("/scrape", methods=["POST"])
 def scrape():
-    criteria_str = request.args.get('criteria', '')
-    quantity_str = request.args.get('quantity', '50')
-
     try:
-        criteria = json.loads(criteria_str)
-        quantity = int(quantity_str)
-        new_titles = scraper_main(criteria, quantity)
-        return jsonify({"status": "success", "data": new_titles}), 200
-    
-    except subprocess.CalledProcessError as e:
-        error_msg = f"Scraper Error for criteria '{criteria}': {e.stderr}"
-        print(error_msg)
-        return jsonify({"success": False, "error": error_msg.strip()}), 500
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "error": "Missing or invalid JSON body"}), 400
+
+        criteria = data.get("criteria", {})
+        quantity = int(data.get("quantity", 50))
+
+        print(f"Received POST with criteria: {json.dumps(criteria)} and quantity: {quantity}")
+
+        result = scraper_main(criteria, quantity)
+        return jsonify({"success": True, "result": result}), 200
 
     except Exception as e:
-        error_msg = f"Unexpected Error while processing criteria '{criteria}': {str(e)} and quantity '{quantity}'"
+        error_msg = f"Unexpected error: {str(e)}"
         print(error_msg)
         return jsonify({"success": False, "error": error_msg}), 500
 
