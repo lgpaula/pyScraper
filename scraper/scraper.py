@@ -147,6 +147,14 @@ def json_to_string(params: dict) -> str:
     rating_to = params.get("ratingTo", "")
     query_params["user_rating"] = f"{rating_from},{rating_to}".rstrip(",")
 
+    # Format companies
+    if params.get("companies"):
+        query_params["companies"] = ",".join(c.lower() for c in params["companies"])
+
+    # Format names
+    if params.get("role"):
+        query_params["role"] = ",".join(n.lower() for n in params["role"])
+
     # Format genres
     if params.get("genres"):
         query_params["genres"] = ",".join(g.lower() for g in params["genres"])
