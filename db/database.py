@@ -1,6 +1,9 @@
 import json
 import sqlite3
 import scraper
+import os
+import sys
+from pathlib import Path
 from utils import Title
 
 # Database setup
@@ -15,8 +18,9 @@ def get_data_dir():
 
     return None
 
-DB_NAME = get_data_dir() + "cinelog.db"
+data_dir = get_data_dir()
 data_dir.mkdir(parents=True, exist_ok=True)
+DB_NAME = data_dir / "cinelog.db"
 
 def create_table():
     with sqlite3.connect(DB_NAME) as conn:
