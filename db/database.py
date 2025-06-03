@@ -4,7 +4,19 @@ import scraper
 from utils import Title
 
 # Database setup
-DB_NAME = "cinelog.db"
+def get_data_dir():
+    if os.name == 'nt':  # Windows
+        return Path(os.getenv('LOCALAPPDATA')) / 'CineLog'
+    elif os.name == 'posix':
+        if sys.platform == 'darwin':  # macOS
+            return Path.home() / 'Library' / 'Application Support' / 'CineLog'
+        else:  # Linux
+            return Path.home() / '.local' / 'share' / 'CineLog'
+
+    return None
+
+DB_NAME = get_data_dir() + "cinelog.db"
+data_dir.mkdir(parents=True, exist_ok=True)
 
 def create_table():
     with sqlite3.connect(DB_NAME) as conn:
@@ -82,6 +94,8 @@ def title_exists(title_id: str) -> bool:
         cursor.execute("SELECT 1 FROM titles_table WHERE title_id = ?", (title_id,))
         return cursor.fetchone() is not None
 
+    return None
+
 def insert_title(title: Title):
     if not title_exists(title.title_id):
         with sqlite3.connect(DB_NAME) as conn:
@@ -111,6 +125,8 @@ def fetch_titles():
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM titles_table")
         return cursor.fetchall()
+
+    return None
 
 def update_title(title_id: str, title: Title):
     if not title_exists(title_id):
