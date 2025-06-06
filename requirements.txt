@@ -1,3 +1,2 @@
-selenium
-webdriver-manager
-sqlite3
+selenium>=4.29.0
+webdriver-manager>=4.0.2
