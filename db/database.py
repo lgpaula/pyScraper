@@ -1,10 +1,9 @@
 import json
 import sqlite3
-import scraper
 import os
 import sys
 from pathlib import Path
-from utils import Title
+from data_scraper.utils import Title
 
 # Database setup
 def get_data_dir():
@@ -98,8 +97,6 @@ def title_exists(title_id: str) -> bool:
         cursor.execute("SELECT 1 FROM titles_table WHERE title_id = ?", (title_id,))
         return cursor.fetchone() is not None
 
-    return None
-
 def insert_title(title: Title):
     if not title_exists(title.title_id):
         with sqlite3.connect(DB_NAME) as conn:
@@ -129,8 +126,6 @@ def fetch_titles():
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM titles_table")
         return cursor.fetchall()
-
-    return None
 
 def update_title(title_id: str, title: Title):
     if not title_exists(title_id):

@@ -5,12 +5,11 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import time
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.common.exceptions import TimeoutException
 from parser import *
 from utils import XPaths
 from db.database import *
@@ -38,11 +37,11 @@ def scrape_multiple_titles(url: str, quantity = 50):
 
         # Remove consent banner
         try:
-            bannerButton = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, XPaths.banner_element))
+            banner_button = WebDriverWait(driver, 3).until(
+                ec.element_to_be_clickable((By.CSS_SELECTOR, XPaths.banner_element))
             )
-            bannerButton.click()
-            wait.until_not(EC.presence_of_element_located((By.CSS_SELECTOR, XPaths.banner_element)))
+            banner_button.click()
+            wait.until_not(ec.presence_of_element_located((By.CSS_SELECTOR, XPaths.banner_element)))
         except (TimeoutException, NoSuchElementException, Exception) as e:
             print("No consent banner found or click failed:", e)
 
@@ -51,7 +50,7 @@ def scrape_multiple_titles(url: str, quantity = 50):
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(1)
 
-                button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
+                button = wait.until(ec.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
                 driver.execute_script(XPaths.scroll_into_view, button)
                 button.click()
                 # Wait until new items are loaded
@@ -97,7 +96,7 @@ def fetch_episode_dates(title_id, season_count):
         # Wait up to 10 seconds for episode items to load
         try:
             wait.until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper"))
+                ec.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper"))
             )
         except Exception as e:
             print("Episode items did not load:", e)
