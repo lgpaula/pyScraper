@@ -134,14 +134,21 @@ def get_season_count(parent2, year_end):
     json_text = parent2.get_attribute("innerHTML")
     data = json.loads(json_text)
 
-    canHaveEpisodes = data["props"]["pageProps"]["aboveTheFoldData"]["canHaveEpisodes"]
+    try:
+        can_have_episodes = data["props"]["pageProps"]["aboveTheFoldData"]["canHaveEpisodes"]
+    except (KeyError, TypeError):
+        return ""
 
-    if not canHaveEpisodes and not year_end: return ""
+    if not can_have_episodes and not year_end:
+        return ""
 
-    seasons = data["props"]["pageProps"]["mainColumnData"]["episodes"]["seasons"]
-    seasonCount = seasonCount = len(seasons)
+    try:
+        seasons = data["props"]["pageProps"]["mainColumnData"]["episodes"]["seasons"]
+        season_count = len(seasons)
+    except (KeyError, TypeError):
+        return ""
 
-    return seasonCount
+    return season_count
 
 def parse_single_title(parent1, parent2, title_id):
     companies = get_companies(parent2)

@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import json
-import subprocess
 from scraper import scraper_main
 from scraper import scrape_single_title
 from scraper import fetch_episode_dates

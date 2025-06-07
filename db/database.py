@@ -1,10 +1,25 @@
 import json
 import sqlite3
-import scraper
-from utils import Title
+import os
+import sys
+from pathlib import Path
+from data_scraper.utils import Title
 
 # Database setup
-DB_NAME = "cinelog.db"
+def get_data_dir():
+    if os.name == 'nt':  # Windows
+        return Path(os.getenv('LOCALAPPDATA')) / 'CineLog'
+    elif os.name == 'posix':
+        if sys.platform == 'darwin':  # macOS
+            return Path.home() / 'Library' / 'Application Support' / 'CineLog'
+        else:  # Linux
+            return Path.home() / '.local' / 'share' / 'CineLog'
+
+    return None
+
+data_dir = get_data_dir()
+data_dir.mkdir(parents=True, exist_ok=True)
+DB_NAME = data_dir / "cinelog.db"
 
 def create_table():
     with sqlite3.connect(DB_NAME) as conn:
