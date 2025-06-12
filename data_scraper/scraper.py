@@ -1,8 +1,33 @@
-from datetime import datetime
-from urllib.parse import urlencode
 import os
+import re
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
+log_file = os.path.join(log_dir, 'backend.log')
+
+file_handler = TimedRotatingFileHandler(log_file, when='midnight', backupCount=7, encoding='utf-8')
+file_handler.suffix = "%Y-%m-%d"
+file_handler.extMatch = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+formatter = logging.Formatter(
+    '%(asctime)s [%(levelname)s] [backend] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.DEBUG)
+
+logging.basicConfig(level=logging.DEBUG, handlers=[file_handler])
+
+for noisy_module in ['werkzeug', 'selenium', 'urllib3']:
+    logging.getLogger(noisy_module).setLevel(logging.WARNING)
+
+from datetime import datetime
+from urllib.parse import urlencode
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -13,7 +38,6 @@ from selenium.common.exceptions import TimeoutException
 from parser import *
 from utils import XPaths
 from db.database import *
-
 
 def setup_driver():
     chrome_options = Options()

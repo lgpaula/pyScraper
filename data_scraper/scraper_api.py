@@ -3,6 +3,7 @@ import json
 from scraper import scraper_main
 from scraper import scrape_single_title
 from scraper import fetch_episode_dates
+import logging
 
 app = Flask(__name__)
 
@@ -21,6 +22,8 @@ def scrape():
         quantity = int(data.get("quantity", 50))
 
         print(f"Received POST with criteria: {json.dumps(criteria)} and quantity: {quantity}")
+
+        logging.info("Received POST with criteria: {json.dumps(criteria)} and quantity: {quantity}")
 
         result = scraper_main(criteria, quantity)
         return jsonify({"success": True, "result": result}), 200
