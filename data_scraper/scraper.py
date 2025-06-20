@@ -1,19 +1,42 @@
-from datetime import datetime
-from urllib.parse import urlencode
 import os
+import re
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+log_dir = os.path.join(os.path.dirname(__file__), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
+log_file = os.path.join(log_dir, 'backend.log')
+
+file_handler = TimedRotatingFileHandler(log_file, when='midnight', backupCount=7, encoding='utf-8')
+file_handler.suffix = "%Y-%m-%d"
+file_handler.extMatch = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+formatter = logging.Formatter(
+    '%(asctime)s [%(levelname)s] [backend] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.DEBUG)
+
+logging.basicConfig(level=logging.DEBUG, handlers=[file_handler])
+
+for noisy_module in ['werkzeug', 'selenium', 'urllib3']:
+    logging.getLogger(noisy_module).setLevel(logging.WARNING)
+
+from datetime import datetime
+from urllib.parse import urlencode
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.common.exceptions import TimeoutException
 from parser import *
 from utils import XPaths
 from db.database import *
-
 
 def setup_driver():
     chrome_options = Options()
@@ -27,23 +50,24 @@ def setup_driver():
     driver.set_page_load_timeout(120)
     return driver
 
-def scrape_multiple_titles(url: str, quantity = 50):
+def scrape_multiple_titles(url: str, quantity=50):
     driver = setup_driver()
     wait = WebDriverWait(driver, 10)
+    logging.info(f"Starting scrape for multiple titles from URL: {url}")
 
     try:
         driver.get(url)
         wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
 
-        # Remove consent banner
         try:
             banner_button = WebDriverWait(driver, 3).until(
                 ec.element_to_be_clickable((By.CSS_SELECTOR, XPaths.banner_element))
             )
             banner_button.click()
             wait.until_not(ec.presence_of_element_located((By.CSS_SELECTOR, XPaths.banner_element)))
-        except (TimeoutException, NoSuchElementException, Exception) as e:
-            print("No consent banner found or click failed:", e)
+            logging.info("Clicked and removed consent banner.")
+        except Exception as e:
+            logging.debug("Consent banner not found or couldn't click: %s", e)
 
         try:
             for _ in range((quantity // 50) - 1):
@@ -53,26 +77,28 @@ def scrape_multiple_titles(url: str, quantity = 50):
                 button = wait.until(ec.element_to_be_clickable((By.CLASS_NAME, XPaths.see_more_button)))
                 driver.execute_script(XPaths.scroll_into_view, button)
                 button.click()
-                # Wait until new items are loaded
                 time.sleep(1)
                 wait.until(lambda d: len(d.find_elements(By.CLASS_NAME, XPaths.multi_title_item)) > 0)
+                logging.debug("Clicked 'See More' to load more results.")
         except Exception as e:
-            print("No button found or click failed:", e)
+            logging.warning("Scrolling or 'See More' interaction failed: %s", e)
 
         ul_element = driver.find_element(By.CLASS_NAME, XPaths.multi_title_parent)
         movie_items = ul_element.find_elements(By.CLASS_NAME, XPaths.multi_title_item)
+        logging.info(f"Found {len(movie_items)} items. Parsing now.")
         movies = parse_title_list(movie_items)
 
         return movies
 
     finally:
         driver.quit()
+        logging.debug("Driver quit after scraping multiple titles.")
 
 def scrape_single_title(title_id):
     driver = setup_driver()
-
     try:
-        url = "https://www.imdb.com/title/" + title_id
+        url = f"https://www.imdb.com/title/{title_id}"
+        logging.info(f"Scraping single title page: {url}")
         driver.get(url)
         time.sleep(1)
 
@@ -80,9 +106,14 @@ def scrape_single_title(title_id):
         parent2 = driver.find_element(By.XPATH, XPaths.single_title_parent_2)
 
         parse_single_title(parent1, parent2, title_id)
+        logging.info(f"Successfully parsed single title {title_id}")
 
+    except Exception as e:
+        logging.error(f"Failed scraping single title {title_id}: {e}", exc_info=True)
+        raise
     finally:
         driver.quit()
+        logging.debug("Driver quit after single title scrape.")
 
 def fetch_episode_dates(title_id, season_count):
     driver = setup_driver()
@@ -90,19 +121,17 @@ def fetch_episode_dates(title_id, season_count):
 
     try:
         url = f"https://www.imdb.com/title/{title_id}/episodes/?season={season_count}"
-        print (url)
+        logging.info(f"Fetching episode dates from URL: {url}")
         driver.get(url)
 
-        # Wait up to 10 seconds for episode items to load
         try:
-            wait.until(
-                ec.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper"))
-            )
+            wait.until(ec.presence_of_element_located((By.CSS_SELECTOR, "article.episode-item-wrapper")))
         except Exception as e:
-            print("Episode items did not load:", e)
+            logging.warning(f"Episode items not loaded: {e}")
             return []
 
         episodes = driver.find_elements(By.CSS_SELECTOR, "article.episode-item-wrapper")
+        logging.info(f"Found {len(episodes)} episodes. Extracting air dates.")
         dates = []
 
         for ep in episodes:
@@ -114,16 +143,17 @@ def fetch_episode_dates(title_id, season_count):
                     dt = datetime.strptime(date_text, "%a, %b %d, %Y")
                     dates.append(dt.date().isoformat())
                 except ValueError:
-                    continue
-
+                    logging.debug(f"Skipping unparsable date: {date_text}")
             except Exception:
                 continue
 
         add_schedule_to_title(title_id, dates)
+        logging.info(f"Stored {len(dates)} dates for title {title_id}")
         return dates
-    
+
     finally:
         driver.quit()
+        logging.debug("Driver quit after fetching episode dates.")
 
 def save_to_file(driver):
     with open("page_source.txt", "w", encoding="utf-8") as f:
@@ -171,6 +201,8 @@ def custom_search_url(params: dict) -> str:
 
 def scraper_main(criteria, quantity):
     criteria_url = custom_search_url(criteria)
+    logging.info(f"Generated search URL: {criteria_url}")
+
     movies = scrape_multiple_titles(criteria_url, quantity)
     create_table()
 
@@ -179,6 +211,7 @@ def scraper_main(criteria, quantity):
         if insert_title(movie):
             inserted += 1
 
+    logging.info(f"Inserted {inserted} out of {len(movies)} scraped titles into database.")
     return inserted
 
 if __name__ == "__main__":
