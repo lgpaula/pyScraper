@@ -4,15 +4,16 @@ from utils import *
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from db.database import update_title
+import logging
 
 def parse_title_list(title_div_list):
-    try:
-        titles = []
+    titles = []
 
-        for item in title_div_list:
+    for item in title_div_list:
+        try:
             name = item.find_element(By.CLASS_NAME, XPaths.title_name).text
             name = re.sub(r'^\d+\.\s', '', name)
-            
+
             id_element = item.find_element(By.CLASS_NAME, XPaths.title_id)
             href = id_element.get_attribute("href")
             id = href.split("/title/")[1].split("/")[0]
@@ -23,36 +24,28 @@ def parse_title_list(title_div_list):
                 srcset_links = srcset.split(", ")
                 last_link = srcset_links[-1].split(" ")[0]
                 poster_url = last_link
-                # update link's ending so it's bigger
-                # ex:
-                # https://m.media-amazon.com/images/M/MV5BYzFjMzNjOTktNDBlNy00YWZhLWExYTctZDcxNDA4OWVhOTJjXkEyXkFqcGc@._V1_QL75_UX280_CR0,0,280,414_.jpg
-                # to
-                # https://m.media-amazon.com/images/M/MV5BYzFjMzNjOTktNDBlNy00YWZhLWExYTctZDcxNDA4OWVhOTJjXkEyXkFqcGc@._V1_QL75_UX560_CR0,0,560,828_.jpg
             except NoSuchElementException:
+                logging.warning(f"No poster found for {id}")
                 poster_url = ""
 
             try:
                 title_type = item.find_element(By.CLASS_NAME, XPaths.title_type).text
             except NoSuchElementException:
+                logging.info(f"No type found for {id}, defaulting to 'Movie'")
                 title_type = "Movie"
 
-            curr_title = Title (
-                title_id = id,
-                title_name = name,
-                title_type = title_type,
-                poster_url = poster_url
+            curr_title = Title(
+                title_id=id,
+                title_name=name,
+                title_type=title_type,
+                poster_url=poster_url
             )
-
             titles.append(curr_title)
 
-        return titles
+        except Exception as e:
+            logging.error(f"Failed to parse item in title list: {e}", exc_info=True)
 
-    except json.JSONDecodeError as e:
-        print("Failed to parse JSON:", e)
-        return []
-    except KeyError as e:
-        print("Missing expected key in JSON:", e)
-        return []
+    return titles
 
 def get_companies(parent2):
     json_text = parent2.get_attribute("innerHTML")
@@ -182,7 +175,7 @@ def parse_single_title(parent1, parent2, title_id):
                 name_elements = content_container.find_elements(By.TAG_NAME, "a")
 
                 extracted_data = [
-                    (name.text.strip(), name.get_attribute("href").split("/")[-2]) 
+                    (name.text.strip(), name.get_attribute("href").split("/")[-2])
                     for name in name_elements if name.text.strip()
                 ]
             except NoSuchElementException:
