@@ -197,7 +197,7 @@ def update_title(title_id: str, title: Title):
         smart_upsert_extras("companies_table", title.companies)
         update_title_relations(title_id, "companies_table", title.companies)
 
-def smart_upsert_extras(table_name: str, entries: list[list[str]]):
+def smart_upsert_extras(table_name: str, entries):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         for name, entry_id in entries:
@@ -219,7 +219,7 @@ def smart_upsert_extras(table_name: str, entries: list[list[str]]):
                 )
         conn.commit()
 
-def update_title_relations(title_id: str, table_name: str, entries: list[list[str]]):
+def update_title_relations(title_id: str, table_name: str, entries):
     """Insert title-to-entity relations in join tables."""
     join_tables = {
         'genres_table': 'title_genre',
