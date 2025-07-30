@@ -1,18 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Blueprint, request, jsonify
 import json
 from scraper import scraper_main
 from scraper import scrape_single_title
 from scraper import fetch_episode_dates
 import logging
 
-app = Flask(__name__)
+scraping_bp = Blueprint('scraping', __name__)
 
-@app.route("/health", methods=["GET"])
+@scraping_bp.route("/health", methods=["GET"])
 def health():
     logging.info("Health check requested.")
     return jsonify({"status": "running"}), 200
 
-@app.route("/scrape", methods=["POST"])
+@scraping_bp.route("/scrape", methods=["POST"])
 def scrape():
     try:
         data = request.get_json()
@@ -34,7 +34,7 @@ def scrape():
         logging.error(error_msg, exc_info=True)
         return jsonify({"success": False, "error": error_msg}), 500
 
-@app.route("/scrape/<title_id>", methods=["POST"])
+@scraping_bp.route("/scrape/<title_id>", methods=["POST"])
 def trigger_scrape(title_id):
     try:
         logging.info(f"Triggering scrape for single title: {title_id}")
@@ -45,7 +45,7 @@ def trigger_scrape(title_id):
         logging.error(f"Error scraping single title {title_id}: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/fetch_episodes', methods=['GET'])
+@scraping_bp.route('/fetch_episodes', methods=['GET'])
 def fetch_episodes():
     title_id = request.args.get('title_id')
     season_count = request.args.get('season_count')
@@ -58,7 +58,3 @@ def fetch_episodes():
     except Exception as e:
         logging.error(f"Failed to fetch episode dates for {title_id}: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=True, threaded=True)
