@@ -9,8 +9,8 @@ scraping_bp = Blueprint('scraping', __name__)
 
 @scraping_bp.route("/health", methods=["GET"])
 def health():
-    logging.info("Health check requested.")
-    return jsonify({"status": "running"}), 200
+    logging.info("Scraper health check requested.")
+    return jsonify({"scraper_status": "running"}), 200
 
 @scraping_bp.route("/scrape", methods=["POST"])
 def scrape():

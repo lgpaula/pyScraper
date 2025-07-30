@@ -6,5 +6,5 @@ db_bp = Blueprint('database', __name__)
 
 @db_bp.route("/health", methods=["GET"])
 def health():
-    logging.info("Health check requested.")
-    return jsonify({"status": "running"}), 200
+    logging.info("Database health check requested.")
+    return jsonify({"database_status": "running"}), 200
