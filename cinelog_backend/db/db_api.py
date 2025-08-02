@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-import json
 import logging
+from title_repository import *
 
 db_bp = Blueprint('database', __name__)
 
@@ -11,10 +11,9 @@ def health():
 
 @db_bp.route('/items/<table>', methods=['GET'])
 def get_items(table):
-    # Your SQLite logic here
-    return {"items": [...]}
+    items = TitleRepository.get_all_items(table)
+    return {"items": items}
 
 @db_bp.route('/tables/<table_name>/exists', methods=['GET'])  
 def table_exists(table_name):
-    # Check if table exists
-    return {"exists": True/False}
+    return {"exists": TitleRepository.exists(table_name)}
