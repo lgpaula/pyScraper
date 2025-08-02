@@ -126,3 +126,29 @@ class TitleRepository:
     def add_schedule_to_title(self, title_id, dates):
         self.db.run("UPDATE titles_table SET schedule_list = ? WHERE title_id = ?",
                 (json.dumps(dates), title_id), commit=True)
+        
+    def get_all_items(self, table: str):
+        # Check if the table exists
+        if self.exists(table) is None:
+            return []
+
+        # Fetch id and name
+        rows = self.db.run(
+            f"SELECT id, name FROM {table}",
+            fetch="all"
+        )
+
+        # Convert rows to list of dicts
+        return [{"Id": str(row["id"]), "Name": str(row["name"])} for row in rows]
+    
+    def get_all_lists(self):
+        # Check if there are lists
+        check = self.db.run("SELECT name FROM sqlite_master WHERE type='table' AND name='lists_table';", fetch="all")
+        if check is None:
+            return []
+
+        # Fetch lists
+        lists = self.db.run("SELECT name, uuid FROM lists_table;", fetch="all")
+
+        # Convert
+        return [{"name": list["name"], "uuid": list["uuid"]} for list in lists]
